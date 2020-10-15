@@ -1,8 +1,8 @@
-#this a simple makefile by ztm
-#CC=/opt/ti/linux-devkit/sysroots/x86_64-arago-linux/usr/bin/arm-linux-gnueabihf-gcc
+#this a simple makefile
+#CC=/opt/xilinx/ctxa9/bin/arm-linux-gnueabihf-gcc
+OBJECTS=uart_test
+
 CC=gcc
-OBJECTS=myshell
-#CC=gcc
 $(OBJECTS):$(subst .c,.o,$(wildcard *.c))
 	$(CC) -o $@ $^ -lm -lpthread
 %.o:%.c

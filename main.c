@@ -1,48 +1,120 @@
-/*
- * main.c
- * transplant by ztm
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License (Version 2) as
- * published by the Free Software Foundation.
- *
- * date: 2020-04-02
- *
- */
-
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
-#include "config.h"
+#include <unistd.h>
+#include <stdlib.h>
+#include <stdint.h>
+#include "interface.h"
 
-static int do_ls(cmd_tbl_t *cmdtp, int flag, int argc, char * const argv[])
+
+void make_cmd(int argc, char** argv, char* cmd)
 {
-	printf("argc = %d \n", argc);
-	return 0;
-}	
+	switch(argc)
+	{
+		case 2:
+		sprintf(cmd, "%s\n", argv[1]);
+		break;
+		case 3:
+		sprintf(cmd, "%s %s\n", argv[1], argv[2]);
+		break;
+		case 4:
+		sprintf(cmd, "%s %s %s\n", argv[1], argv[2], argv[3]);
+		break;
+		case 5:
+		sprintf(cmd, "%s %s %s %s\n", argv[1], argv[2], argv[3], argv[4]);
+		break;
+		case 6:
+		sprintf(cmd, "%s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5]);
+		break;
+		case 7:
+		sprintf(cmd, "%s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
+		break;
+		case 8:
+		sprintf(cmd, "%s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
+			, argv[7]);
+		break;
+		case 9:
+		sprintf(cmd, "%s %s %s %s %s %s %s, %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
+			, argv[7], argv[8]);
+		break;
+		case 10:
+		sprintf(cmd, "%s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
+			, argv[7], argv[8], argv[9]);
+		break;
+		case 11:
+		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
+			, argv[7], argv[8], argv[9], argv[10]);
+		break;
+		case 12:
+		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
+			, argv[7], argv[8], argv[9], argv[10], argv[11]);
+		break;
+		case 13:
+		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
+			, argv[7], argv[8], argv[9], argv[10], argv[11], argv[12]);
+		break;
+		case 14:
+		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4] \
+			, argv[5], argv[6] , argv[7], argv[8], argv[9], argv[10], argv[11], argv[12], argv[13]);
+		break;
+		case 15:
+		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4] \
+			, argv[5], argv[6] , argv[7], argv[8], argv[9], argv[10], argv[11], argv[12], argv[13], argv[14]);
+		break;
+		case 16:
+		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4] \
+			, argv[5], argv[6] , argv[7], argv[8], argv[9], argv[10], argv[11], argv[12], argv[13], argv[14], argv[15]);
+		break;
+		default:
+		printf("argc = %d err \n", argc);
+		break;
+	}
+
+}
+
 int main(int argc, char** argv)
 {
-	char cmd[CONFIG_SYS_CBSIZE];
-	char* buff = NULL;
-	cmd_init();
-	BOOT_CMD(mkdir, 0, NULL, "This is dummy mkdir command.");
-	BOOT_CMD(mknode, 0, NULL, "This is dummy mknode command.");
-	BOOT_CMD(ls, 3, do_ls, "This is dummy ls command.");
-	BOOT_CMD(cd, 0, NULL, "This is dummy cd command.");
-	BOOT_CMD(ps, 0, NULL, "This is dummy ps command.");
-	BOOT_CMD(ifconfig, 0, NULL, "This is dummy ifconfig command.");
-	BOOT_CMD(run, 0, NULL, "This is dummy run command.");
+	int fd;
+	int l;
+	int i;
+	int ret;
+	char cmd[1024] = {0};
+	char rcv_buf[8192] = {0};
 	
-	while(1)
+	if(argc == 1)
 	{
-		buff = readline(CONFIG_SYS_PROMPT);
-		if(buff != NULL)
-		{
-			strcpy(cmd, buff);
-			run_cmd(cmd);
-		}else
-		{
-			printf("ERROR \n");
-		}
+		printf("parameter must be > 1 \n");
+		return 1;
 	}
+
+	make_cmd(argc, argv, cmd);
+#if 1	
+	fd = serial_init("ttyUSB0");
+	if(fd < 0)
+	{
+		printf("full_init failed \n");
+		return 1;
+	}
+
+	//ret = serial_config(fd, BAUDRATE_9600, DATABIT_8, STOP_BIT_1, NONE_CHECK);
+	ret = serial_config(fd, BAUDRATE_115200, DATABIT_8, STOP_BIT_1, NONE_CHECK);
+	if(ret < 0)
+	{
+		serial_exit(fd);
+		return 1;
+	}
+	//usleep(10000);	
+	serial_write(fd, cmd, strlen(cmd));
+	//sleep(2);
+	l = serial_read(fd, rcv_buf, sizeof(rcv_buf));
+	serial_exit(fd);
+	rcv_buf[l+1] = '\0';
+	printf("recv len = %d \n", l);
+	for(i = 0; i < l; i++)
+	{
+		printf("%c", rcv_buf[i]);
+	}
+	//printf("rcv_buf: %s \n", rcv_buf);
+#endif
+	
+	return 0;
 }

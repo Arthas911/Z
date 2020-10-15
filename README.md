@@ -10,4 +10,4 @@
 
 6. git push -u origin master
 
-Email: soclosesofar@126.com
+7. Email: soclosesofar@126.com

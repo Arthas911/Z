@@ -1,0 +1,20 @@
+20200402-1910:
+1. my shell test ok.
+20200404-1608:
+if have a question example
+=>
+   =>
+      =>
+         =>
+
+pelase change readline.c cread_line function
+{
+	ichar = getcmd_getch();
+
+	if ((ichar == '\n') || (ichar == '\r')) {
+		getcmd_putch('\n');
+		getcmd_putch('\r');/* add a '\r' to console */
+		break;
+} 
+20200806-1457:
+add autocomplete

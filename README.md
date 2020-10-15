@@ -8,4 +8,6 @@
 
 5. git remote add origin https://github.com/Arthas911/Z.git
 
-6 git push -u origin master
+6. git push -u origin master
+
+Email: soclosesofar@126.com

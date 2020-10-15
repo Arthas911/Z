@@ -1,21 +1,10 @@
-/*
- * list.h
- * transplant by ztm
- * 
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License (Version 2) as
- * published by the Free Software Foundation.
- *
- * date: 2020-04-02
- *
- */
 #ifndef _LINUX_LIST_H
 #define _LINUX_LIST_H
 
 #define LIST_POISON1  ((void *) 0x0)
 #define LIST_POISON2  ((void *) 0x0)
 
-#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+//#define offsetof(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
 
 #define container_of(ptr, type, member) ({			\
 	const typeof( ((type *)0)->member ) *__mptr = (ptr);	\

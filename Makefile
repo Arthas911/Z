@@ -1,6 +1,6 @@
 #this a simple makefile
 #CC=/opt/ti/linux-devkit/sysroots/x86_64-arago-linux/usr/bin/arm-linux-gnueabihf-gcc
-OBJECTS=mm_test
+OBJECTS=main
 CC=gcc
 $(OBJECTS):$(subst .c,.o,$(wildcard *.c))
 	$(CC) -o $@ $^ -lm -lpthread

@@ -1,120 +1,107 @@
 #include <stdio.h>
 #include <string.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdint.h>
-#include "interface.h"
+#include "kfifo.h"
 
-
-void make_cmd(int argc, char** argv, char* cmd)
+struct test_packet
 {
-	switch(argc)
-	{
-		case 2:
-		sprintf(cmd, "%s\n", argv[1]);
-		break;
-		case 3:
-		sprintf(cmd, "%s %s\n", argv[1], argv[2]);
-		break;
-		case 4:
-		sprintf(cmd, "%s %s %s\n", argv[1], argv[2], argv[3]);
-		break;
-		case 5:
-		sprintf(cmd, "%s %s %s %s\n", argv[1], argv[2], argv[3], argv[4]);
-		break;
-		case 6:
-		sprintf(cmd, "%s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5]);
-		break;
-		case 7:
-		sprintf(cmd, "%s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6]);
-		break;
-		case 8:
-		sprintf(cmd, "%s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
-			, argv[7]);
-		break;
-		case 9:
-		sprintf(cmd, "%s %s %s %s %s %s %s, %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
-			, argv[7], argv[8]);
-		break;
-		case 10:
-		sprintf(cmd, "%s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
-			, argv[7], argv[8], argv[9]);
-		break;
-		case 11:
-		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
-			, argv[7], argv[8], argv[9], argv[10]);
-		break;
-		case 12:
-		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
-			, argv[7], argv[8], argv[9], argv[10], argv[11]);
-		break;
-		case 13:
-		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4], argv[5], argv[6] \
-			, argv[7], argv[8], argv[9], argv[10], argv[11], argv[12]);
-		break;
-		case 14:
-		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4] \
-			, argv[5], argv[6] , argv[7], argv[8], argv[9], argv[10], argv[11], argv[12], argv[13]);
-		break;
-		case 15:
-		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4] \
-			, argv[5], argv[6] , argv[7], argv[8], argv[9], argv[10], argv[11], argv[12], argv[13], argv[14]);
-		break;
-		case 16:
-		sprintf(cmd, "%s %s %s %s %s %s %s %s %s %s %s %s %s %s %s\n", argv[1], argv[2], argv[3], argv[4] \
-			, argv[5], argv[6] , argv[7], argv[8], argv[9], argv[10], argv[11], argv[12], argv[13], argv[14], argv[15]);
-		break;
-		default:
-		printf("argc = %d err \n", argc);
-		break;
-	}
-
-}
+	int a;
+	int b;
+	int c;
+	int d;
+};
 
 int main(int argc, char** argv)
 {
-	int fd;
-	int l;
+#if 1
 	int i;
-	int ret;
-	char cmd[1024] = {0};
-	char rcv_buf[8192] = {0};
+	DECLARE_KFIFO_PTR(MY_FIFO, struct test_packet);
+	kfifo_alloc(&MY_FIFO, 1024);
+	struct test_packet packet_out[4];
 	
-	if(argc == 1)
+	struct test_packet packet_in[] = 
 	{
-		printf("parameter must be > 1 \n");
-		return 1;
-	}
+		{
+			.a = 10,
+			.b = 20,
+			.c = 30,
+			.d = 40,
+		},
+		{
+			.a = 11,
+			.b = 21,
+			.c = 31,
+			.d = 41,
+		
+		},
+		{
+			.a = 12,
+			.b = 22,
+			.c = 32,
+			.d = 42,
+		},
+		{
+			.a = 13,
+			.b = 23,
+			.c = 33,
+			.d = 43,
+		},
+		
+	};
 
-	make_cmd(argc, argv, cmd);
-#if 1	
-	fd = serial_init("ttyUSB0");
-	if(fd < 0)
-	{
-		printf("full_init failed \n");
-		return 1;
-	}
+	kfifo_put(&MY_FIFO, packet_in[0]);
+	kfifo_put(&MY_FIFO, packet_in[1]);
+	kfifo_put(&MY_FIFO, packet_in[2]);
+	kfifo_put(&MY_FIFO, packet_in[3]);
 
-	//ret = serial_config(fd, BAUDRATE_9600, DATABIT_8, STOP_BIT_1, NONE_CHECK);
-	ret = serial_config(fd, BAUDRATE_115200, DATABIT_8, STOP_BIT_1, NONE_CHECK);
-	if(ret < 0)
+	kfifo_get(&MY_FIFO, &packet_out[0]);
+	kfifo_get(&MY_FIFO, &packet_out[1]);
+	kfifo_get(&MY_FIFO, &packet_out[2]);
+	kfifo_get(&MY_FIFO, &packet_out[3]);
+
+	for(i = 0; i < 4; i++)
 	{
-		serial_exit(fd);
-		return 1;
+		printf("a = %d \n", packet_out[i].a);
+		printf("b = %d \n", packet_out[i].b);
+		printf("c = %d \n", packet_out[i].c);
+		printf("d = %d \n", packet_out[i].d);
 	}
-	//usleep(10000);	
-	serial_write(fd, cmd, strlen(cmd));
-	//sleep(2);
-	l = serial_read(fd, rcv_buf, sizeof(rcv_buf));
-	serial_exit(fd);
-	rcv_buf[l+1] = '\0';
-	printf("recv len = %d \n", l);
-	for(i = 0; i < l; i++)
-	{
-		printf("%c", rcv_buf[i]);
-	}
-	//printf("rcv_buf: %s \n", rcv_buf);
-#endif
 	
+	kfifo_free(&MY_FIFO);	
 	return 0;
+
+#else	
+#if 0	
+	DECLARE_KFIFO(MY_FIFO, char, 1024);
+	INIT_KFIFO(MY_FIFO);	
+#else
+	DECLARE_KFIFO_PTR(MY_FIFO, char);
+	kfifo_alloc(&MY_FIFO, 1024);
+#endif	
+	int i;
+	int len;
+	char buff_out[64];
+	char buff_in[64];
+	for(i = 0; i < sizeof(buff_in); i++)
+	{
+		buff_in[i] = i;
+	}
+
+	memset(buff_out , 0, sizeof(buff_out));
+	kfifo_in(&MY_FIFO, buff_in, sizeof(buff_in));
+
+	len = kfifo_out(&MY_FIFO, buff_out, 34);
+
+	for(i = 0; i < len; i++)
+	{
+		if((i != 0)&&(((i%16) == 0)))
+		{
+			printf("\n");
+		}
+		printf("%02d ", buff_out[i]);
+	}
+
+	printf("\n");
+	kfifo_free(&MY_FIFO);	
+	return 0;
+#endif
 }
